@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  github-runner:
+    image: myoung34/github-runner:debian-bookworm
+    environment:
+      - RUNNER_SCOPE=org
+      - ORG_NAME=${ORG_NAME}
+      - ACCESS_TOKEN=${TOKEN}
+      - EPHEMERAL=true
+      - ACTIONS_RESULTS_URL=http://cache-server:3000/
+      - LABELS=${LABELS}
+    entrypoint: ["/patched-entrypoint.sh"]
+    command: ["./bin/Runner.Listener", "run", "--startuptype", "service"]
+    volumes:
+      - ./patched-entrypoint.sh:/patched-entrypoint.sh:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+  cache-server:
+    image: ghcr.io/falcondev-oss/github-actions-cache-server
+    environment:
+      API_BASE_URL: http://cache-server:3000
+    volumes:
+      - ./cache-data:/app/.data
+    restart: always
