@@ -13,12 +13,12 @@ services:
     command: ["./bin/Runner.Listener", "run", "--startuptype", "service"]
     volumes:
       - ./patched-entrypoint.sh:/patched-entrypoint.sh:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:rw
     restart: always
   cache-server:
     image: ghcr.io/falcondev-oss/github-actions-cache-server
     environment:
       API_BASE_URL: http://cache-server:3000
     volumes:
-      - ./cache-data:/app/.data
+      - ./cache-data:/app/.data:rw
     restart: always
