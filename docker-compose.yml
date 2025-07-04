@@ -14,6 +14,10 @@ services:
     volumes:
       - ./patched-entrypoint.sh:/patched-entrypoint.sh:ro
       - /var/run/docker.sock:/var/run/docker.sock:rw
+    devices:
+      - /dev/kvm:/dev/kvm
+    cap_add:
+      - SYS_ADMIN
     restart: always
   cache-server:
     image: ghcr.io/falcondev-oss/github-actions-cache-server
