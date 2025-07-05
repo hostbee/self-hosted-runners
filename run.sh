@@ -35,7 +35,7 @@ nft add rule inet filter forward ip saddr == @cn_ip counter meta mark set 0x2
 nft add rule inet filter forward ip daddr == @cn_ip counter meta mark set 0x2
 
 tc qdisc add dev "$br_name" root handle 1: htb default 30
-tc class add dev "$br_name" parent 1: classid 1:10 htb rate 120mbit ceil 120mbit quantum 10000
+tc class add dev "$br_name" parent 1: classid 1:10 htb rate 100mbit ceil 100mbit quantum 10000
 tc class add dev "$br_name" parent 1: classid 1:20 htb rate 800mbit ceil 800mbit quantum 100000
 tc class add dev "$br_name" parent 1: classid 1:30 htb rate 100gbit ceil 100gbit quantum 10000000
 tc qdisc replace dev "$br_name" parent 1:10 fq_codel
