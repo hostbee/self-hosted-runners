@@ -26,13 +26,20 @@ tc qdisc del dev "$br_name" root
 nft add table inet filter
 nft add chain inet filter forward '{ type filter hook forward priority 0; }'
 nft add set inet filter cn_ip '{ type ipv4_addr; flags interval; }'
+nft add set inet filter local_ip '{ type ipv4_addr; flags interval; }'
 nft add element inet filter cn_ip "{ $(curl -4sSkL https://raw.githubusercontent.com/herrbischoff/country-ip-blocks/master/ipv4/cn.cidr | grep -E '^[0-9./]+$' | paste -sd, -) }"
+nft add element inet filter local_ip '{ 10.0.0.0/8 }'
 
-nft add rule inet filter forward ip saddr != @cn_ip counter meta mark set 0x1
+nft add rule inet filter forward ip saddr != @cn_ip ip saddr != @local_ip counter meta mark set 0x1
+nft add rule inet filter forward ip saddr == @cn_ip counter meta mark set 0x2
+nft add rule inet filter forward ip daddr == @cn_ip counter meta mark set 0x2
 
-tc qdisc add dev "$br_name" root handle 1: htb default 20 r2q 1000
-tc class add dev "$br_name" parent 1: classid 1:10 htb rate 120mbit ceil 120mbit
-tc class add dev "$br_name" parent 1: classid 1:20 htb rate 1gbit ceil 1gbit
+tc qdisc add dev "$br_name" root handle 1: htb default 30
+tc class add dev "$br_name" parent 1: classid 1:10 htb rate 120mbit ceil 120mbit quantum 10000
+tc class add dev "$br_name" parent 1: classid 1:20 htb rate 1gbit ceil 1gbit quantum 100000
+tc class add dev "$br_name" parent 1: classid 1:30 htb rate 100gbit ceil 100gbit quantum 10000000
 tc qdisc replace dev "$br_name" parent 1:10 fq_codel
 tc qdisc replace dev "$br_name" parent 1:20 fq_codel
+tc qdisc replace dev "$br_name" parent 1:30 fq_codel
 tc filter add dev "$br_name" protocol ip parent 1:0 prio 1 handle 1 fw flowid 1:10
+tc filter add dev "$br_name" protocol ip parent 1:0 prio 2 handle 2 fw flowid 1:20
