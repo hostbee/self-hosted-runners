@@ -42,3 +42,10 @@ tc qdisc replace dev "$br_name" parent 1:20 fq_codel target 20ms interval 200ms 
 tc qdisc replace dev "$br_name" parent 1:30 fq_codel target 20ms interval 200ms memory_limit 1024Mb
 tc filter add dev "$br_name" protocol ip parent 1:0 prio 1 handle 1 fw flowid 1:10
 tc filter add dev "$br_name" protocol ip parent 1:0 prio 2 handle 2 fw flowid 1:20
+
+echo "Starting Daemon..."
+while true; do
+    docker compose rm -f 2>/dev/null
+    docker compose up --scale github-runner="$SCALE" -d 2>&1 | grep -E 'Creating|Recreating|Restarting'
+    sleep 1
+done
