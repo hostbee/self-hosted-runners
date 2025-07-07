@@ -16,6 +16,10 @@ if [ -z "$ORG_NAME" ]; then
     exit 1
 fi
 
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+sysctl -w net.ipv6.conf.lo.disable_ipv6=1
+
 docker compose up --scale github-runner="$SCALE" -d
 
 br_name=$(docker network ls --filter name=self-hosted-runners_default --format 'br-{{.ID}}')
