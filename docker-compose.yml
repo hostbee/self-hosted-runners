@@ -5,7 +5,8 @@ services:
       - RUNNER_SCOPE=org
       - ORG_NAME=${ORG_NAME}
       - ACCESS_TOKEN=${TOKEN}
-      - EPHEMERAL=true
+      - DISABLE_AUTO_UPDATE=1
+      - EPHEMERAL=1
       - ACTIONS_RESULTS_URL=http://cache-server:3000/
       - LABELS=${LABELS}
     entrypoint: ["/patched-entrypoint.sh"]
